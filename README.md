@@ -43,7 +43,7 @@ Make sure you have [Vagrant](https://vagrantup.com/) installed (version 1.6 or b
 git clone https://github.com/cloudfoundry-incubator/lattice.git
 cd lattice
 git checkout <VERSION>
-vagrant up
+vagrant up --provider virtualbox
 ```
 
 This spins up a virtual environment that is accessible at `192.168.11.11`.  Here, `VERSION` refers to the tagged version you wish to deploy.  These tagged versions are known to be stable.
