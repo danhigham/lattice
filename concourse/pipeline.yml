@@ -1,0 +1,28 @@
+resources:
+  - name: lattice
+    type: git
+    source: 
+      uri: https://github.com/cloudfoundry-incubator/lattice.git
+      branch: concourse
+
+  - name: diego-release
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry-incubator/diego-release.git
+      branch: master
+
+  - name: cf-release
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/cf-release.git
+      branch: runtime-passed
+
+jobs:
+  - name: ltc-unit-test
+    plan:
+      - aggregate:
+        - get: lattice
+          trigger: true
+        - get: diego-release
+      - task: ltc-unit-test
+      	file: lattice/concourse/tasks/ltc-unit-test/task.yml
