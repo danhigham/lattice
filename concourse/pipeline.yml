@@ -25,4 +25,4 @@ jobs:
           trigger: true
         - get: diego-release
       - task: ltc-unit-test
-      	file: lattice/concourse/tasks/ltc-unit-test/task.yml
+        file: lattice/concourse/tasks/ltc-unit-test/task.yml
