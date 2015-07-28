@@ -2,16 +2,21 @@
 
 set -x -e
 
-export LATTICE_SRC_PATH=$PWD
+export LATTICE_SRC_PATH=$PWD/lattice
 export DIEGO_RELEASE_PATH=$PWD/lattice/build/diego-release
-export GOPATH=$PWD/lattice/build/diego-release
+export GOPATH=$DIEGO_RELEASE_PATH
 export PATH=$GOPATH/bin:$PATH
 
 rm -rf $GOPATH/src/github.com/docker/docker
 
 go get github.com/onsi/ginkgo/ginkgo
 
-pushd lattice/ltc
+pushd $GOPATH/src/github.com/cloudfoundry-incubator
+	## make me relative
+	ln -sfv $LATTICE_SRC_PATH lattice
+popd
+
+pushd $GOPATH/src/github.com/cloudfoundry-incubator/lattice/ltc
 	godep restore
 
 	./scripts/test
