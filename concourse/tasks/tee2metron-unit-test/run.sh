@@ -6,6 +6,8 @@ export LATTICE_SRC_PATH=$PWD/lattice
 export GOPATH=$PWD/go
 export PATH=$GOPATH/bin:$PATH
 
+whoami
+
 go get github.com/onsi/ginkgo/ginkgo
 go get github.com/onsi/gomega
 

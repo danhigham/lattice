@@ -38,3 +38,4 @@ jobs:
         trigger: true
       - task: tee2metron-unit-test
         file: lattice/concourse/tasks/tee2metron-unit-test/task.yml
+        privileged: true
