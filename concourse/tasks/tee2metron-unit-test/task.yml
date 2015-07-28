@@ -4,5 +4,5 @@ image: docker:///cloudfoundry/lattice-pipeline
 inputs:
 - name: lattice
 run:
-  path: lattice/concourse/tasks/s3tool-unit-test/run.sh
+  path: lattice/concourse/tasks/tee2metron-unit-test/run.sh
 
