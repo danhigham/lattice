@@ -7,6 +7,7 @@ export GOPATH=$PWD/go
 export PATH=$GOPATH/bin:$PATH
 
 go get github.com/onsi/ginkgo/ginkgo
+go get github.com/onsi/gomega
 
 mkdir -p $GOPATH/src/github.com/cloudfoundry-incubator/lattice/cell-helpers
 pushd $GOPATH/src/github.com/cloudfoundry-incubator/lattice/cell-helpers
