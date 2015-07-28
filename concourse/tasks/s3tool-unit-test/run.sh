@@ -13,7 +13,7 @@ pushd $GOPATH/src/github.com/cloudfoundry-incubator/lattice/cell-helpers
 	ln -sfv $LATTICE_SRC_PATH/cell-helpers/s3tool s3tool
 
 	pushd s3tool
-		go get ./...
+		go get -v ./...
 		
 		ginkgo -r -race
 	popd
