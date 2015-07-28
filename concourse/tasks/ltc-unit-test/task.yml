@@ -7,6 +7,4 @@ inputs:
   path: lattice/build/diego-release
 run:
   path: lattice/concourse/tasks/ltc-unit-test/run.sh
-params:
-  LATTICE_SRC_PATH: $PWD/lattice
 

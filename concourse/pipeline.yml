@@ -26,3 +26,9 @@ jobs:
         - get: diego-release
       - task: ltc-unit-test
         file: lattice/concourse/tasks/ltc-unit-test/task.yml
+  - name: s3tool-unit-test
+    plan:
+      - get: lattice
+        trigger: true
+      - task: s3tool-unit-test
+        file: lattice/concourse/tasks/s3tool-unit-test/task.yml
