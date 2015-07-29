@@ -1,30 +1,17 @@
-#!/bin/bash 
+#!/bin/bash
 
 set -x -e
 
 export LATTICE_SRC_PATH=$PWD/lattice
-export DIEGO_RELEASE_PATH=$PWD/lattice/build/diego-release
-export GOPATH=$DIEGO_RELEASE_PATH
-export PATH=$GOPATH/bin:$PATH
 
-pushd $DIEGO_RELEASE_PATH
-	git checkout $(cat $LATTICE_SRC_PATH/DIEGO_VERSION)
-	git clean -xffd
-	./scripts/update
-popd
+mkdir -p $PWD/go/src/github.com/cloudfoundry-incubator $PWD/go/bin
+ln -sf $LATTICE_SRC_PATH $PWD/go/src/github.com/cloudfoundry-incubator/lattice
 
-rm -rf $GOPATH/src/github.com/docker/docker
+export GOBIN=$PWD/go/bin
+export GOPATH=$LATTICE_SRC_PATH/Godeps/_workspace:$PWD/go
+export PATH=$GOBIN:$PATH
 
-go get github.com/onsi/ginkgo/ginkgo
+go install github.com/onsi/ginkgo/ginkgo
 
-pushd $GOPATH/src/github.com/cloudfoundry-incubator
-	## make me relative
-	ln -sfv $LATTICE_SRC_PATH lattice
-popd
-
-pushd $GOPATH/src/github.com/cloudfoundry-incubator/lattice/ltc
-	godep restore
-
-	./scripts/test
-popd
+ginkgo -r --randomizeAllSpecs --randomizeSuites --failOnPending --trace --race $LATTICE_SRC_PATH/ltc
 

@@ -4,17 +4,13 @@ set -x -e
 
 export LATTICE_SRC_PATH=$PWD/lattice
 
-#mkdir -p $PWD/go/src/github.com/cloudfoundry-incubator $PWD/go/bin
 mkdir -p $PWD/go/src/github.com/cloudfoundry-incubator
-ln -sf $LATTICE_SRC_PATH $GOPATH/src/github.com/cloudfoundry-incubator/lattice
+ln -sf $LATTICE_SRC_PATH $PWD/go/src/github.com/cloudfoundry-incubator/lattice
 
 export LATTICE_VERSION=$(git -C $LATTICE_SRC_PATH describe)
 export DIEGO_VERSION=$(cat $LATTICE_SRC_PATH/DIEGO_VERSION)
 
-#export GOBIN=$PWD/go/bin
-export GOPATH=$LATTICE_SRC_PATH/Godeps/_workspace:$GOPATH
-#export PATH=$GOBIN:$PATH
-#go install github.com/onsi/ginkgo/ginkgo
+export GOPATH=$LATTICE_SRC_PATH/Godeps/_workspace:$PWD/go
 
 GOARCH=amd64 GOOS=linux go build \
     -ldflags \
