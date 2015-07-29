@@ -9,7 +9,14 @@ export PATH=$GOPATH/bin:$PATH
 
 pushd $DIEGO_RELEASE_PATH
 	git checkout $(cat $LATTICE_SRC_PATH/DIEGO_VERSION)
+	git clean -xffd
 	./scripts/update
+popd
+
+pushd $LATTICE_SRC_PATH/build/cf-release
+	git checkout $(cat $LATTICE_SRC_PATH/CF_VERSION)
+	git clean -xffd
+	./update
 popd
 
 $LATTICE_SRC_PATH/pipeline/01_compilation/compile_lattice_tar
