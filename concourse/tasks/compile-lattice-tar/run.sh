@@ -35,5 +35,5 @@ echo $CF_VERSION > $LATTICE_SRC_PATH/build/lattice-build/common/CF_VERSION
 
 tar czf $LATTICE_SRC_PATH/build/lattice.tgz -C $LATTICE_SRC_PATH/build lattice-build
 
-mv $LATTICE_SRC_PATH/build/lattice.tgz $LATTICE_SRC_PATH/build/lattice-${lattice_version}.tgz
+mv $LATTICE_SRC_PATH/build/lattice.tgz $LATTICE_SRC_PATH/build/lattice-${LATTICE_VERSION}.tgz
 
