@@ -8,7 +8,7 @@ export GOPATH=$DIEGO_RELEASE_PATH
 export PATH=$GOPATH/bin:$PATH
 
 pushd $DIEGO_RELEASE_PATH
-	git co $(cat $LATTICE_SRC_PATH/DIEGO_VERSION)
+	git checkout $(cat $LATTICE_SRC_PATH/DIEGO_VERSION)
 	./scripts/update
 popd
 
