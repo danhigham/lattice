@@ -50,3 +50,13 @@ jobs:
         - get: cf-release
       - task: compile-lattice-tar
         file: lattice/concourse/tasks/compile-lattice-tar/task.yml
+  - name: compile-ltc
+    plan:
+      - aggregate:
+        - get: lattice
+          passed:
+            - ltc-unit-test
+          trigger: true
+        - get: diego-release
+      - task: compile-ltc
+        file: lattice/concourse/tasks/compile-ltc/task.yml
