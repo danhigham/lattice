@@ -4,7 +4,7 @@ set -x -e
 
 export LATTICE_SRC_PATH=$PWD/lattice
 
-mkdir -p $PWD/go/src/github.com/cloudfoundry-incubator
+mkdir -p $PWD/go/src/github.com/cloudfoundry-incubator $LATTICE_SRC_PATH/build
 ln -sf $LATTICE_SRC_PATH $PWD/go/src/github.com/cloudfoundry-incubator/lattice
 
 export LATTICE_VERSION=$(git -C $LATTICE_SRC_PATH describe)
