@@ -7,6 +7,11 @@ export DIEGO_RELEASE_PATH=$PWD/lattice/build/diego-release
 export GOPATH=$DIEGO_RELEASE_PATH
 export PATH=$GOPATH/bin:$PATH
 
+pushd $DIEGO_RELEASE_PATH
+	git co $(cat $LATTICE_SRC_PATH/DIEGO_VERSION)
+	./scripts/update
+popd
+
 $LATTICE_SRC_PATH/pipeline/01_compilation/compile_ltc
 
 

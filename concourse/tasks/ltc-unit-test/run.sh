@@ -7,6 +7,11 @@ export DIEGO_RELEASE_PATH=$PWD/lattice/build/diego-release
 export GOPATH=$DIEGO_RELEASE_PATH
 export PATH=$GOPATH/bin:$PATH
 
+pushd $DIEGO_RELEASE_PATH
+	git co $(cat $LATTICE_SRC_PATH/DIEGO_VERSION)
+	./scripts/update
+popd
+
 rm -rf $GOPATH/src/github.com/docker/docker
 
 go get github.com/onsi/ginkgo/ginkgo
