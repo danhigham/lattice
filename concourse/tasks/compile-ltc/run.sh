@@ -15,3 +15,7 @@ popd
 $LATTICE_SRC_PATH/pipeline/01_compilation/compile_ltc
 
 
+pushd $LATTICE_SRC_PATH
+	lattice_version=$(git describe --always --dirty)
+	mv build/ltc.tar.gz build/ltc-${lattice_version}.tgz
+popd
