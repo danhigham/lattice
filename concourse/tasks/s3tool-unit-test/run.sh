@@ -12,7 +12,7 @@ export PATH=$GOPATH/bin:$PATH
 
 go get github.com/onsi/ginkgo/ginkgo
 
-pushd $LATTICE_SRC_PATH/cell-helpers/s3tool
+pushd $PWD/go/src/github.com/cloudfoundry-incubator/lattice/cell-helpers/s3tool
   go get -v ./...
   ginkgo -r --randomizeAllSpecs --randomizeSuites --failOnPending --trace --race .
 popd
