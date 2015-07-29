@@ -34,10 +34,8 @@ resources:
 jobs:
   - name: ltc-unit-test
     plan:
-      - aggregate:
-        - get: lattice
-          trigger: true
-        - get: diego-release
+      - get: lattice
+        trigger: true
       - task: ltc-unit-test
         file: lattice/concourse/tasks/ltc-unit-test/task.yml
   - name: s3tool-unit-test
@@ -68,14 +66,13 @@ jobs:
         params:
           from: lattice/build/lattice-v(.*).tgz
           to: /experimental/lattice/
+
   - name: compile-ltc
     plan:
-      - aggregate:
-        - get: lattice
-          passed:
-            - ltc-unit-test
-          trigger: true
-        - get: diego-release
+      - get: lattice
+        passed:
+          - ltc-unit-test
+        trigger: true
       - task: compile-ltc
         file: lattice/concourse/tasks/compile-ltc/task.yml
       - put: ltc-tar
