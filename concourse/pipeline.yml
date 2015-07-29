@@ -19,14 +19,14 @@ resources:
     source:
       bucket: lattice-concourse
       private: true
-      regexp: compile-lattice-tar/lattice-(.*).tgz
+      regexp: lattice-v(.*).tgz
       access_key_id: {{s3-access-key-id}}
       secret_access_key: {{s3-secret-access-key}}
   - name: ltc-tar
     type: s3
     source:
       bucket: lattice-concourse
-      regexp: compile-ltc/ltc-(.*).tgz
+      regexp: ltc-v(.*).tgz
       private: true
       access_key_id: {{s3-access-key-id}}
       secret_access_key: {{s3-secret-access-key}}
@@ -66,7 +66,8 @@ jobs:
         file: lattice/concourse/tasks/compile-lattice-tar/task.yml
       - put: lattice-tar
         params:
-          from: lattice/build/lattice-(.*).tgz
+          from: lattice/build/lattice-v(.*).tgz
+          to: /experimental/lattice/
   - name: compile-ltc
     plan:
       - aggregate:
@@ -79,4 +80,5 @@ jobs:
         file: lattice/concourse/tasks/compile-ltc/task.yml
       - put: ltc-tar
         params:
-          from: lattice/build/ltc-(.*).tgz
+          from: lattice/build/ltc-v(.*).tgz
+          to: /experimental/ltc/
