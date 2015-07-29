@@ -33,7 +33,7 @@ echo $LATTICE_VERSION > $LATTICE_SRC_PATH/build/lattice-build/common/LATTICE_VER
 echo $DIEGO_VERSION > $LATTICE_SRC_PATH/build/lattice-build/common/DIEGO_VERSION
 echo $CF_VERSION > $LATTICE_SRC_PATH/build/lattice-build/common/CF_VERSION
 
-tar -C $LATTICE_SRC_PATH/build czf lattice.tgz lattice-build
+tar czf $LATTICE_SRC_PATH/build/lattice.tgz -C $LATTICE_SRC_PATH/build lattice-build
 
 mv $LATTICE_SRC_PATH/build/lattice.tgz $LATTICE_SRC_PATH/build/lattice-${lattice_version}.tgz
 
