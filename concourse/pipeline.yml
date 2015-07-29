@@ -1,7 +1,7 @@
 resources:
   - name: lattice
     type: git
-    source: 
+    source:
       uri: https://github.com/cloudfoundry-incubator/lattice.git
       branch: concourse
   - name: diego-release
@@ -18,14 +18,16 @@ resources:
     type: s3
     source:
       bucket: lattice-concourse
-      regexp: lattice/build/lattice-(.*).tgz
+      private: true
+      regexp: compile-lattice-tar/lattice-(.*).tgz
       access_key_id: {{s3-access-key-id}}
       secret_access_key: {{s3-secret-access-key}}
   - name: ltc-tar
     type: s3
     source:
       bucket: lattice-concourse
-      regexp: lattice/build/ltc-(.*).tgz
+      regexp: compile-ltc/ltc-(.*).tgz
+      private: true
       access_key_id: {{s3-access-key-id}}
       secret_access_key: {{s3-secret-access-key}}
 
@@ -64,8 +66,7 @@ jobs:
         file: lattice/concourse/tasks/compile-lattice-tar/task.yml
       - put: lattice-tar
         params:
-          from: lattice/build/lattice-.*\.tgz
-          to: lattice
+          from: lattice/build/lattice-(.*).tgz
   - name: compile-ltc
     plan:
       - aggregate:
@@ -78,5 +79,4 @@ jobs:
         file: lattice/concourse/tasks/compile-ltc/task.yml
       - put: ltc-tar
         params:
-          from: lattice/build/ltc-.*\.tgz
-          to: ltc
+          from: lattice/build/ltc-(.*).tgz

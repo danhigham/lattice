@@ -25,3 +25,5 @@ pushd $LATTICE_SRC_PATH
 	lattice_version=$(git describe --always --dirty)
 	mv build/lattice.tgz build/lattice-${lattice_version}.tgz
 popd
+
+ls -l $LATTICE_SRC_PATH/build
