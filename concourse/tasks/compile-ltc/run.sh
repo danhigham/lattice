@@ -1,23 +1,33 @@
-#!/bin/bash 
+#!/bin/bash
 
 set -x -e
 
 export LATTICE_SRC_PATH=$PWD/lattice
-export DIEGO_RELEASE_PATH=$PWD/lattice/build/diego-release
-export GOPATH=$DIEGO_RELEASE_PATH
-export PATH=$GOPATH/bin:$PATH
 
-pushd $DIEGO_RELEASE_PATH
-	git checkout $(cat $LATTICE_SRC_PATH/DIEGO_VERSION)
-	./scripts/update
-popd
+#mkdir -p $PWD/go/src/github.com/cloudfoundry-incubator $PWD/go/bin
+mkdir -p $PWD/go/src/github.com/cloudfoundry-incubator
+ln -sf $LATTICE_SRC_PATH $GOPATH/src/github.com/cloudfoundry-incubator/lattice
 
-$LATTICE_SRC_PATH/pipeline/01_compilation/compile_ltc
+export LATTICE_VERSION=$(git -C $LATTICE_SRC_PATH describe)
+export DIEGO_VERSION=$(cat $LATTICE_SRC_PATH/DIEGO_VERSION)
 
+#export GOBIN=$PWD/go/bin
+export GOPATH=$LATTICE_SRC_PATH/Godeps/_workspace:$GOPATH
+#export PATH=$GOBIN:$PATH
+#go install github.com/onsi/ginkgo/ginkgo
 
-pushd $LATTICE_SRC_PATH
-	lattice_version=$(git describe --always --dirty)
-	mv build/ltc.tar.gz build/ltc-${lattice_version}.tgz
-popd
+GOARCH=amd64 GOOS=linux go build \
+    -ldflags \
+        "-X github.com/cloudfoundry-incubator/lattice/ltc/setup_cli.latticeVersion $LATTICE_VERSION
+         -X github.com/cloudfoundry-incubator/lattice/ltc/setup_cli.diegoVersion $DIEGO_VERSION" \
+    -o ltc-linux-amd64 \
+    github.com/cloudfoundry-incubator/lattice/ltc
 
-ls -l $LATTICE_SRC_PATH/build
+GOARCH=amd64 GOOS=darwin go build \
+    -ldflags \
+        "-X github.com/cloudfoundry-incubator/lattice/ltc/setup_cli.latticeVersion $LATTICE_VERSION
+         -X github.com/cloudfoundry-incubator/lattice/ltc/setup_cli.diegoVersion $DIEGO_VERSION" \
+    -o ltc-darwin-amd64 \
+    github.com/cloudfoundry-incubator/lattice/ltc
+
+tar czf $LATTICE_SRC_PATH/build/ltc-${LATTICE_VERSION}.tgz ltc-linux-amd64 ltc-darwin-amd64
