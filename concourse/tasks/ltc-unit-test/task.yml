@@ -3,8 +3,6 @@ platform: linux
 image: docker:///cloudfoundry/lattice-pipeline
 inputs:
 - name: lattice
-- name: diego-release
-  path: lattice/build/diego-release
 run:
   path: lattice/concourse/tasks/ltc-unit-test/run.sh
 
