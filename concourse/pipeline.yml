@@ -38,3 +38,15 @@ jobs:
         trigger: true
       - task: tee2metron-unit-test
         file: lattice/concourse/tasks/tee2metron-unit-test/task.yml
+  - name: compile-lattice-tar
+    plan:
+      - aggregate:
+        - get: lattice
+          passed:
+            - s3tool-unit-test
+            - tee2metron-unit-test
+          trigger: true
+        - get: diego-release
+        - get: cf-release
+      - task: compile-lattice-tar
+        file: lattice/concourse/tasks/compile-lattice-tar/task.yml
