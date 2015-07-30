@@ -25,6 +25,17 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     v.customize ["modifyvm", :id, "--ioapic", "on"]
   end
 
+  config.vm.provider :aws do |aws, override|
+    aws.access_key_id = ENV["AWS_ACCESS_KEY_ID"]
+    aws.secret_access_key = ENV["AWS_SECRET_ACCESS_KEY"]
+    aws.keypair_name = ENV["AWS_KEYPAIR_NAME"]
+
+    aws.ami = "ami-a98478ed"
+
+    override.ssh.username = "vagrant"
+    override.ssh.private_key_path = ENV["AWS_SSH_PRIVATE_KEY_PATH"]
+  end
+
   system_ip = ENV["LATTICE_SYSTEM_IP"] || "192.168.11.11"
   system_domain = ENV["LATTICE_SYSTEM_DOMAIN"] || "#{system_ip}.xip.io"
   config.vm.network "private_network", ip: system_ip
