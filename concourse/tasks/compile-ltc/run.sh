@@ -2,15 +2,15 @@
 
 set -x -e
 
-export LATTICE_SRC_PATH=$PWD/lattice
+export LATTICE_DIR=$PWD/lattice
 
-mkdir -p $PWD/go/src/github.com/cloudfoundry-incubator $LATTICE_SRC_PATH/build
-ln -sf $LATTICE_SRC_PATH $PWD/go/src/github.com/cloudfoundry-incubator/lattice
+mkdir -p $PWD/go/src/github.com/cloudfoundry-incubator $LATTICE_DIR/build
+ln -sf $LATTICE_DIR $PWD/go/src/github.com/cloudfoundry-incubator/lattice
 
-export LATTICE_VERSION=$(git -C $LATTICE_SRC_PATH describe)
-export DIEGO_VERSION=$(cat $LATTICE_SRC_PATH/DIEGO_VERSION)
+export LATTICE_VERSION=$(git -C $LATTICE_DIR describe)
+export DIEGO_VERSION=$(cat $LATTICE_DIR/DIEGO_VERSION)
 
-export GOPATH=$LATTICE_SRC_PATH/ltc/Godeps/_workspace:$PWD/go
+export GOPATH=$LATTICE_DIR/ltc/Godeps/_workspace:$PWD/go
 
 GOARCH=amd64 GOOS=linux go build \
     -ldflags \
@@ -26,4 +26,4 @@ GOARCH=amd64 GOOS=darwin go build \
     -o ltc-darwin-amd64 \
     github.com/cloudfoundry-incubator/lattice/ltc
 
-tar czf $LATTICE_SRC_PATH/build/ltc-${LATTICE_VERSION}.tgz ltc-linux-amd64 ltc-darwin-amd64
+tar czf $LATTICE_DIR/build/ltc-${LATTICE_VERSION}.tgz ltc-linux-amd64 ltc-darwin-amd64

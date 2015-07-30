@@ -19,17 +19,39 @@ resources:
     source:
       bucket: lattice-concourse
       private: true
-      regexp: lattice-v(.*).tgz
+      regexp: experimental/lattice-v(.*).tgz
       access_key_id: {{s3-access-key-id}}
       secret_access_key: {{s3-secret-access-key}}
   - name: ltc-tar
     type: s3
     source:
       bucket: lattice-concourse
-      regexp: ltc-v(.*).tgz
+      regexp: experimental/ltc-v(.*).tgz
       private: true
       access_key_id: {{s3-access-key-id}}
       secret_access_key: {{s3-secret-access-key}}
+  - name: lattice-tar-nightly
+    type: s3
+    source:
+      bucket: lattice-concourse
+      regexp: nightly/lattice-v(.*).tgz
+      private: true
+      access_key_id: {{s3-access-key-id}}
+      secret_access_key: {{s3-secret-access-key}}
+  - name: ltc-tar-nightly
+    type: s3
+    source:
+      bucket: lattice-concourse
+      regexp: nightly/ltc-v(.*).tgz
+      private: true
+      access_key_id: {{s3-access-key-id}}
+      secret_access_key: {{s3-secret-access-key}}
+  - name: publish-nightly-timer
+    type: time
+    source:
+      start: 00:00 -0500
+      stop: 01:00 -0500
+      interval: 1h
 
 jobs:
   - name: unit-test-ltc
@@ -38,44 +60,78 @@ jobs:
         trigger: true
       - task: unit-test-ltc
         file: lattice/concourse/tasks/unit-test-ltc/task.yml
+
   - name: unit-test-s3tool
     plan:
       - get: lattice
         trigger: true
       - task: unit-test-s3tool
         file: lattice/concourse/tasks/unit-test-s3tool/task.yml
+
   - name: unit-test-tee2metron
     plan:
       - get: lattice
         trigger: true
       - task: unit-test-tee2metron
         file: lattice/concourse/tasks/unit-test-tee2metron/task.yml
-  - name: compile-lattice-tar
+
+  - name: compile-lattice
     plan:
       - aggregate:
         - get: lattice
           passed:
+            - unit-test-ltc
             - unit-test-s3tool
             - unit-test-tee2metron
           trigger: true
         - get: diego-release
         - get: cf-release
-      - task: compile-lattice-tar
-        file: lattice/concourse/tasks/compile-lattice-tar/task.yml
-      - put: lattice-tar
-        params:
-          from: lattice/build/lattice-v(.*).tgz
-          to: /experimental/lattice/
+      - aggregate:
+        - task: compile-lattice-tar
+          file: lattice/concourse/tasks/compile-lattice-tar/task.yml
+        - task: compile-ltc
+          file: lattice/concourse/tasks/compile-ltc/task.yml
+      - aggregate:
+        - put: lattice-tar
+          params:
+            from: lattice/build/lattice-v(.*).tgz
+            to: /experimental/lattice/
+        - put: ltc-tar
+          params:
+            from: lattice/build/ltc-v(.*).tgz
+            to: /experimental/ltc/
 
-  - name: compile-ltc
+  - name: cluster-test
     plan:
-      - get: lattice
-        passed:
-          - unit-test-ltc
+      - aggregate:
+        - get: lattice
+          trigger: true
+          passed: [compile-lattice]
+        - get: lattice-tar
+          passed: [compile-lattice]
+        - get: ltc-tar
+          passed: [compile-lattice]
+
+  - name: publish-nightly-lattice
+    plan:
+      - get: publish-nightly-timer
         trigger: true
-      - task: compile-ltc
-        file: lattice/concourse/tasks/compile-ltc/task.yml
-      - put: ltc-tar
-        params:
-          from: lattice/build/ltc-v(.*).tgz
-          to: /experimental/ltc/
+      - aggregate:
+        - get: lattice
+          passed: [cluster-test]
+        - get: lattice-tar
+          passed: [cluster-test]
+        - get: ltc-tar
+          passed: [cluster-test]
+      - task: generate-terraform-templates
+        file: lattice/concourse/tasks/generate-terraform-templates/task.yml
+      - aggregate:
+        - put: lattice-tar-nightly
+          params:
+            from: lattice-tar/lattice-v(.*).tgz
+            to: /nightly/lattice/
+        - put: ltc-tar-nightly
+          params:
+            from: ltc-tar/ltc-v(.*).tgz
+            to: /nightly/ltc/
+
