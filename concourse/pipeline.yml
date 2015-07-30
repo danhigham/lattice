@@ -32,31 +32,31 @@ resources:
       secret_access_key: {{s3-secret-access-key}}
 
 jobs:
-  - name: ltc-unit-test
+  - name: unit-test-ltc
     plan:
       - get: lattice
         trigger: true
-      - task: ltc-unit-test
-        file: lattice/concourse/tasks/ltc-unit-test/task.yml
-  - name: s3tool-unit-test
+      - task: unit-test-ltc
+        file: lattice/concourse/tasks/unit-test-ltc/task.yml
+  - name: unit-test-s3tool
     plan:
       - get: lattice
         trigger: true
-      - task: s3tool-unit-test
-        file: lattice/concourse/tasks/s3tool-unit-test/task.yml
-  - name: tee2metron-unit-test
+      - task: unit-test-s3tool
+        file: lattice/concourse/tasks/unit-test-s3tool/task.yml
+  - name: unit-test-tee2metron
     plan:
       - get: lattice
         trigger: true
-      - task: tee2metron-unit-test
-        file: lattice/concourse/tasks/tee2metron-unit-test/task.yml
+      - task: unit-test-tee2metron
+        file: lattice/concourse/tasks/unit-test-tee2metron/task.yml
   - name: compile-lattice-tar
     plan:
       - aggregate:
         - get: lattice
           passed:
-            - s3tool-unit-test
-            - tee2metron-unit-test
+            - unit-test-s3tool
+            - unit-test-tee2metron
           trigger: true
         - get: diego-release
         - get: cf-release
@@ -71,7 +71,7 @@ jobs:
     plan:
       - get: lattice
         passed:
-          - ltc-unit-test
+          - unit-test-ltc
         trigger: true
       - task: compile-ltc
         file: lattice/concourse/tasks/compile-ltc/task.yml
