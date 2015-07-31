@@ -1,10 +1,14 @@
 .vagrant
 .idea
 *.iml
+.agignore
+
 lattice.tgz
 ltc.tar.gz
 .lattice-environment
 /build
+/images/**/*.box
+packer_cache
 
 *.test
 *.coverprofile
