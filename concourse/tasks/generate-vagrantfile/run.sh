@@ -13,3 +13,5 @@ sed 's/source = "github\.com.*$/source = "github\.com\/cloudfoundry-incubator\/l
 	< $LATTICE_DIR/terraform/google/example > lattice-$LATTICE_VERSION.google.tf
 sed 's/source = "github\.com.*$/source = "github\.com\/cloudfoundry-incubator\/lattice\/\/terraform\/\/openstack\?ref='"$LATTICE_VERSION"'"/' \
 	< $LATTICE_DIR/terraform/openstack/example > lattice-$LATTICE_VERSION.openstack.tf
+
+( echo LATTICE_URL = $LATTICE_VERSION; cat input ) > output

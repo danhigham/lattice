@@ -1,3 +1,5 @@
+LATTICE_URL=''
+
 Vagrant.configure("2") do |config|
 
   ## credit: https://stefanwrobel.com/how-to-make-vagrant-performance-not-suck
@@ -61,8 +63,6 @@ Vagrant.configure("2") do |config|
       echo "LATTICE_CELL_ID=cell-01" >> /var/lattice/setup/lattice-environment
       echo "CONDENSER_ON=#{ENV['CONDENSER_ON'].to_s}" >> /var/lattice/setup/lattice-environment
       echo "DOWNLOAD_ROOTFS=#{ENV['DOWNLOAD_ROOTFS'].to_s}" >> /var/lattice/setup/lattice-environment
-
-      cp /var/lattice/setup/lattice-environment /vagrant/.lattice-environment
     SCRIPT
   end
 
@@ -72,19 +72,29 @@ Vagrant.configure("2") do |config|
     end
   end
 
-  lattice_tar_version=File.read(File.join(File.dirname(__FILE__), "Version")).chomp
-  if lattice_tar_version =~ /\-[[:digit:]]+\-g[0-9a-fA-F]{7,10}$/
-    lattice_tar_url="https://s3-us-west-2.amazonaws.com/lattice/unstable/#{lattice_tar_version}/lattice.tgz"
-  else
-    lattice_tar_url="https://s3-us-west-2.amazonaws.com/lattice/releases/#{lattice_tar_version}/lattice.tgz"
+  if !File.exists?(File.join(File.dirname(__FILE__), "lattice.tgz"))
+    lattice_url = defined? LATTICE_URL && LATTICE_URL
+
+    if lattice_url
+      begin
+        lattice_version = File.read(File.join(File.dirname(__FILE__), 'Version')).chomp
+        lattice_url = "https://s3-us-west-2.amazonaws.com/lattice-concourse/releases/lattice-#{lattice_version}.tgz"
+      rescue
+  	puts 'Could not determine lattice version, and no local lattice.tgz present.'
+        exit(1)
+      end
+    end
+
+    system('curl', '-o', 'lattice.tgz', lattice_url)
   end
 
   config.vm.provision "shell" do |s|
-    s.path = "cluster/scripts/install-from-tar"
-    s.args = ["collocated", ENV["VAGRANT_LATTICE_TAR_PATH"].to_s, lattice_tar_url]
-  end
-
-  config.vm.provision "shell" do |s|
-    s.inline = "export $(cat /var/lattice/setup/lattice-environment) && printf '\nLattice is now installed and running.\nYou may target it using: ltc target %s\n \n' $SYSTEM_DOMAIN"
+    s.inline = <<-SCRIPT
+	tar xzf /vagrant/lattice.tgz lattice-build/scripts/install-from-tar --strip-components=2 -C /tmp
+	/tmp/install-from-tar collocated /vagrant/lattice.tgz 
+	. /var/lattice/setup/lattice-environment
+	echo "Lattice is now installed and running."
+	echo "You may target it using: ltc target ${SYSTEM_DOMAIN}\n"
+    SCRIPT
   end
 end

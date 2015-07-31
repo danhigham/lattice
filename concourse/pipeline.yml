@@ -123,15 +123,30 @@ jobs:
           passed: [cluster-test]
         - get: ltc-tar
           passed: [cluster-test]
-      - task: generate-terraform-templates
-        file: lattice/concourse/tasks/generate-terraform-templates/task.yml
+      - aggregate:
+        - task: generate-terraform-templates
+          file: lattice/concourse/tasks/generate-terraform-templates/task.yml
+        - task: generate-vagrantfile
+          file: lattice/concourse/tasks/generate-vagrantfile/task.yml
       - aggregate:
         - put: lattice-tar-nightly
           params:
             from: lattice-tar/lattice-v(.*).tgz
             to: /nightly/lattice/
+        - put: lattice-tar-nightly
+          params:
+            from: lattice-tar/lattice-v(.*).tgz
+            to: /nightly/lattice/lattice-latest.tgz
         - put: ltc-tar-nightly
           params:
             from: ltc-tar/ltc-v(.*).tgz
             to: /nightly/ltc/
+        - put: ltc-tar-nightly
+          params:
+            from: ltc-tar/ltc-v(.*).tgz
+            to: /nightly/ltc/ltc-latest.tgz
+        - put: terraform-templates-nightly
+          params:
+            from: lattice-v(.*).tf
+            to: /nightly/terraform/
 
