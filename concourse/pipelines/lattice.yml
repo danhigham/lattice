@@ -127,6 +127,11 @@ jobs:
           passed: [compile-lattice]
         - get: ltc-tar
           passed: [compile-lattice]
+      - aggregate:
+        - task: cluster-test-terraform
+          file: lattice/concourse/tasks/cluster-test-terraform/task.yml
+        - task: cluster-test-vagrant
+          file: lattice/concourse/tasks/cluster-test-vagrant/task.yml
 
   - name: publish-nightly-lattice
     plan:

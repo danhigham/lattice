@@ -1,0 +1,104 @@
+resources:
+  - name: lattice
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry-incubator/lattice.git
+      branch: concourse
+      paths: [/Version]
+  - name: lattice-tar-release
+    type: s3
+    source:
+      bucket: lattice-concourse
+      regexp: releases/lattice-v(.*).tgz
+      private: true
+      access_key_id: {{s3-access-key-id}}
+      secret_access_key: {{s3-secret-access-key}}
+  - name: ltc-tar-release
+    type: s3
+    source:
+      bucket: lattice-concourse
+      regexp: releases/ltc-v(.*).tgz
+      private: true
+      access_key_id: {{s3-access-key-id}}
+      secret_access_key: {{s3-secret-access-key}}
+  - name: terraform-templates-release
+    type: s3
+    source:
+      bucket: lattice-concourse
+      regexp: releases/lattice-v(.*).tf
+      private: true
+      access_key_id: {{s3-access-key-id}}
+      secret_access_key: {{s3-secret-access-key}}
+  - name: vagrantfile-release
+    type: s3
+    source:
+      bucket: lattice-concourse
+      regexp: releases/Vagrantfile-v(.*)
+      private: true
+      access_key_id: {{s3-access-key-id}}
+      secret_access_key: {{s3-secret-access-key}}
+
+
+jobs:
+  - name: build-release
+    plan:
+      - aggregate:
+        - get: lattice
+          trigger: true
+        - get: diego-release
+        - get: cf-release
+      - task: tag-lattice
+        file: lattice/concourse/tasks/tag-lattice/task.yml
+      - aggregate:
+        - task: unit-test-ltc
+          file: lattice/concourse/tasks/unit-test-ltc/task.yml
+        - task: unit-test-s3tool
+          file: lattice/concourse/tasks/unit-test-s3tool/task.yml
+        - task: unit-test-tee2metron
+          file: lattice/concourse/tasks/unit-test-tee2metron/task.yml
+      - aggregate:
+        - task: compile-lattice-tar
+          file: lattice/concourse/tasks/compile-lattice-tar/task.yml
+        - task: compile-ltc
+          file: lattice/concourse/tasks/compile-ltc/task.yml
+      - aggregate:
+        - task: cluster-test-terraform
+          file: lattice/concourse/tasks/cluster-test-terraform/task.yml
+        - task: cluster-test-vagrant
+          file: lattice/concourse/tasks/cluster-test-vagrant/task.yml
+      - aggregate:
+        - task: generate-terraform-templates
+          file: lattice/concourse/tasks/generate-terraform-templates/task.yml
+        - task: generate-vagrantfile
+          file: lattice/concourse/tasks/generate-vagrantfile/task.yml
+      - aggregate:
+        - put: lattice-tar-release
+          params:
+            from: lattice-tar/lattice-v(.*).tgz
+            to: /releases/
+        - put: ltc-tar-release
+          params:
+            from: ltc-tar/ltc-v(.*).tgz
+            to: /releases/
+        - put: terraform-templates-release
+          params:
+            from: lattice-v(.*).aws.tf
+            to: /releases/
+        - put: terraform-templates-release
+          params:
+            from: lattice-v(.*).digitalocean.tf
+            to: /releases/
+        - put: terraform-templates-release
+          params:
+            from: lattice-v(.*).google.tf
+            to: /releases/
+        - put: terraform-templates-release
+          params:
+            from: lattice-v(.*).openstack.tf
+            to: /releases/
+        - put: vagrantfile-release
+          params:
+            from: Vagrantfile-v(.*)
+            to: /releases/
+      - task: push-lattice-tag
+        file: lattice/concourse/tasks/push-lattice-tag/task.yml
