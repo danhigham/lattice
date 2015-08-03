@@ -46,6 +46,22 @@ resources:
       private: true
       access_key_id: {{s3-access-key-id}}
       secret_access_key: {{s3-secret-access-key}}
+  - name: terraform-templates-nightly
+    type: s3
+    source:
+      bucket: lattice-concourse
+      regexp: nightly/lattice-v(.*).tf
+      private: true
+      access_key_id: {{s3-access-key-id}}
+      secret_access_key: {{s3-secret-access-key}}
+  - name: vagrantfile-nightly
+    type: s3
+    source:
+      bucket: lattice-concourse
+      regexp: nightly/Vagrantfile-v(.*)
+      private: true
+      access_key_id: {{s3-access-key-id}}
+      secret_access_key: {{s3-secret-access-key}}
   - name: publish-nightly-timer
     type: time
     source:
@@ -132,21 +148,25 @@ jobs:
         - put: lattice-tar-nightly
           params:
             from: lattice-tar/lattice-v(.*).tgz
-            to: /nightly/lattice/
+            to: /nightly/
         - put: lattice-tar-nightly
           params:
             from: lattice-tar/lattice-v(.*).tgz
-            to: /nightly/lattice/lattice-latest.tgz
+            to: /nightly/lattice-latest.tgz
         - put: ltc-tar-nightly
           params:
             from: ltc-tar/ltc-v(.*).tgz
-            to: /nightly/ltc/
+            to: /nightly/
         - put: ltc-tar-nightly
           params:
             from: ltc-tar/ltc-v(.*).tgz
-            to: /nightly/ltc/ltc-latest.tgz
+            to: /nightly/ltc-latest.tgz
         - put: terraform-templates-nightly
           params:
             from: lattice-v(.*).tf
-            to: /nightly/terraform/
+            to: /nightly/
+        - put: vagrantfile-nightly
+          params:
+            from: Vagrantfile-v(.*)
+            to: /nightly/
 
