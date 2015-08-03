@@ -111,11 +111,11 @@ jobs:
         - put: lattice-tar
           params:
             from: lattice/build/lattice-v(.*).tgz
-            to: /experimental/lattice/
+            to: /experimental/
         - put: ltc-tar
           params:
             from: lattice/build/ltc-v(.*).tgz
-            to: /experimental/ltc/
+            to: /experimental/
 
   - name: cluster-test
     plan:
@@ -163,7 +163,19 @@ jobs:
             to: /nightly/ltc-latest.tgz
         - put: terraform-templates-nightly
           params:
-            from: lattice-v(.*).tf
+            from: lattice-v(.*).aws.tf
+            to: /nightly/
+        - put: terraform-templates-nightly
+          params:
+            from: lattice-v(.*).digitalocean.tf
+            to: /nightly/
+        - put: terraform-templates-nightly
+          params:
+            from: lattice-v(.*).google.tf
+            to: /nightly/
+        - put: terraform-templates-nightly
+          params:
+            from: lattice-v(.*).openstack.tf
             to: /nightly/
         - put: vagrantfile-nightly
           params:

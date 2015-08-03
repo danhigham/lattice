@@ -1,5 +1,3 @@
-LATTICE_URL=''
-
 Vagrant.configure("2") do |config|
 
   ## credit: https://stefanwrobel.com/how-to-make-vagrant-performance-not-suck
@@ -73,7 +71,7 @@ Vagrant.configure("2") do |config|
   end
 
   if !File.exists?(File.join(File.dirname(__FILE__), "lattice.tgz"))
-    lattice_url = defined? LATTICE_URL && LATTICE_URL
+    lattice_url = defined?(LATTICE_URL) && LATTICE_URL
 
     if lattice_url
       begin
