@@ -15,6 +15,28 @@ resources:
     source:
       uri: https://github.com/cloudfoundry/cf-release.git
       branch: runtime-passed
+  - name: lattice-tar-experimental-release
+    type: s3
+    source:
+      bucket: lattice-concourse
+      regexp: experimental-releases/lattice-v(.*).tgz
+      private: true
+      access_key_id: {{s3-access-key-id}}
+      secret_access_key: {{s3-secret-access-key}}
+  - name: lattice-release
+    type: github-relesase
+    source:
+      user: {{github-api-user}}
+      repository: sclevine/dummy-lattice
+      access_token: {{github-api-token}}
+  - name: ltc-tar-experimental-release
+    type: s3
+    source:
+      bucket: lattice-concourse
+      regexp: experimental-releases/ltc-v(.*).tgz
+      private: true
+      access_key_id: {{s3-access-key-id}}
+      secret_access_key: {{s3-secret-access-key}}
   - name: lattice-tar-release
     type: s3
     source:
@@ -50,15 +72,10 @@ resources:
 
 
 jobs:
-  - name: build-release
+  - name: unit-tests
     plan:
-      - aggregate:
-        - get: lattice
-          trigger: true
-        - get: diego-release
-        - get: cf-release
-      - task: tag-lattice
-        file: lattice/concourse/tasks/tag-lattice/task.yml
+      - get: lattice
+        trigger: true
       - aggregate:
         - task: unit-test-ltc
           file: lattice/concourse/tasks/unit-test-ltc/task.yml
@@ -66,16 +83,56 @@ jobs:
           file: lattice/concourse/tasks/unit-test-s3tool/task.yml
         - task: unit-test-tee2metron
           file: lattice/concourse/tasks/unit-test-tee2metron/task.yml
+
+  - name: compile
+    plan:
+      - aggregate:
+        - get: lattice
+          trigger: true
+          passed: [unit-tests]
+        - get: diego-release
+        - get: cf-release
       - aggregate:
         - task: compile-lattice-tar
           file: lattice/concourse/tasks/compile-lattice-tar/task.yml
         - task: compile-ltc
           file: lattice/concourse/tasks/compile-ltc/task.yml
       - aggregate:
+        - put: lattice-tar-experimental-release
+          params:
+            from: lattice/build/lattice-v(.*).tgz
+            to: /experimental-releases/
+        - put: ltc-tar-experimental-release
+          params:
+            from: lattice/build/ltc-v(.*).tgz
+            to: /experimental-releases/
+
+  - name: cluster-test
+    plan:
+      - aggregate:
+        - get: lattice
+          trigger: true
+          passed: [compile]
+        - get: lattice-tar-experimental-release
+          passed: [compile]
+        - get: ltc-tar-experimental-release
+          passed: [compile]
+      - aggregate:
         - task: cluster-test-terraform
           file: lattice/concourse/tasks/cluster-test-terraform/task.yml
         - task: cluster-test-vagrant
           file: lattice/concourse/tasks/cluster-test-vagrant/task.yml
+
+  - name: publish-release
+    plan:
+      - aggregate:
+        - get: lattice
+          trigger: true
+          passed: [cluster-test]
+        - get: lattice-tar-experimental-release
+          passed: [cluster-test]
+        - get: ltc-tar-experimental-release
+          passed: [cluster-test]
       - aggregate:
         - task: generate-terraform-templates
           file: lattice/concourse/tasks/generate-terraform-templates/task.yml
@@ -84,11 +141,11 @@ jobs:
       - aggregate:
         - put: lattice-tar-release
           params:
-            from: lattice-tar/lattice-v(.*).tgz
+            from: lattice-tar-experimental/lattice-v(.*).tgz
             to: /releases/
         - put: ltc-tar-release
           params:
-            from: ltc-tar/ltc-v(.*).tgz
+            from: ltc-tar-experimental/ltc-v(.*).tgz
             to: /releases/
         - put: terraform-templates-release
           params:
@@ -110,5 +167,15 @@ jobs:
           params:
             from: Vagrantfile-v(.*)
             to: /releases/
-      - task: push-lattice-tag
-        file: lattice/concourse/tasks/push-lattice-tag/task.yml
+      - put: lattice-release
+        params:
+          tag: lattice/Version
+          globs:
+            - lattice-tar-experimental/lattice-v(.*).tgz
+            - lattice-tar-experimental/ltc-v(.*).tgz
+            - lattice-v(.*).aws.tf
+            - lattice-v(.*).digitalocean.tf
+            - lattice-v(.*).google.tf
+            - lattice-v(.*).openstack.tf
+            - Vagrantfile-v(.*)
+
