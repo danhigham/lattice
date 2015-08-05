@@ -22,16 +22,22 @@ Vagrant.configure("2") do |config|
   config.vm.provider :aws do |aws, override|
     aws.access_key_id = ENV["AWS_ACCESS_KEY_ID"]
     aws.secret_access_key = ENV["AWS_SECRET_ACCESS_KEY"]
+    aws.keypair_name = "concourse-test"
 
+    override.ssh.username = "ubuntu"
     override.ssh.private_key_path = ENV["AWS_SSH_PRIVATE_KEY_PATH"]
+
+    #config.vm.synced_folder ".", "/vagrant", type: "rsync"
+    override.nfs.functional = false
   end
 
-  provider_is_aws = (!ARGV.nil? && ARGV.join('').match(/provider(=|\s+)aws/))
+  provider_is_aws = (!ARGV.nil? && ARGV.join(' ').match(/provider(=|\s+)aws/))
 
   if provider_is_aws
     system_values = <<-SCRIPT
-      SYSTEM_IP=$(curl http://169.254.169.254/latest/meta-data/public-ipv4)
-      SYSTEM_DOMAIN=${SYSTEM_IP}.xip.io
+      PUBLIC_IP=$(curl http://169.254.169.254/latest/meta-data/public-ipv4)
+      PRIVATE_IP=$(hostname -I|awk '{print $1}')
+      SYSTEM_DOMAIN="${PUBLIC_IP}.xip.io"
     SCRIPT
 
     config.ssh.insert_key = false
@@ -40,8 +46,9 @@ Vagrant.configure("2") do |config|
     system_domain = ENV["LATTICE_SYSTEM_DOMAIN"] || "#{system_ip}.xip.io"
 
     system_values = <<-SCRIPT
-      echo "SYSTEM_IP=#{system_ip}" >> /var/lattice/setup/lattice-environment
-      echo "SYSTEM_DOMAIN=#{system_domain}" >> /var/lattice/setup/lattice-environment
+      PUBLIC_IP=#{system_ip}
+      PRIVATE_IP=#{system_ip}
+      SYSTEM_DOMAIN=#{system_domain}
     SCRIPT
 
     config.vm.network "private_network", ip: system_ip
@@ -53,11 +60,13 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell" do |s|
     s.inline = <<-SCRIPT
       mkdir -pv /var/lattice/setup
+
       #{system_values}
-      echo "CONSUL_SERVER_IP=$SYSTEM_IP" >> /var/lattice/setup/lattice-environment
-      echo "SYSTEM_IP=$SYSTEM_IP" >> /var/lattice/setup/lattice-environment
-      echo "GARDEN_EXTERNAL_IP=$SYSTEM_IP" >> /var/lattice/setup/lattice-environment
+
+      echo "CONSUL_SERVER_IP=$PRIVATE_IP" >> /var/lattice/setup/lattice-environment
+      echo "SYSTEM_IP=$PUBLIC_IP" >> /var/lattice/setup/lattice-environment
       echo "SYSTEM_DOMAIN=$SYSTEM_DOMAIN" >> /var/lattice/setup/lattice-environment
+      echo "GARDEN_EXTERNAL_IP=$PRIVATE_IP" >> /var/lattice/setup/lattice-environment
       echo "LATTICE_CELL_ID=cell-01" >> /var/lattice/setup/lattice-environment
       echo "CONDENSER_ON=#{ENV['CONDENSER_ON'].to_s}" >> /var/lattice/setup/lattice-environment
       echo "DOWNLOAD_ROOTFS=#{ENV['DOWNLOAD_ROOTFS'].to_s}" >> /var/lattice/setup/lattice-environment
