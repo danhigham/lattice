@@ -31,7 +31,7 @@ Vagrant.configure("2") do |config|
   if provider_is_aws
     system_values = <<-SCRIPT
       SYSTEM_IP=$(curl http://169.254.169.254/latest/meta-data/public-ipv4)
-      SYSTEM_DOMAIN=$(curl http://169.254.169.254/latest/meta-data/public-hostname)
+      SYSTEM_DOMAIN=${SYSTEM_IP}.xip.io
     SCRIPT
 
     config.ssh.insert_key = false
@@ -73,14 +73,9 @@ Vagrant.configure("2") do |config|
   if !File.exists?(File.join(File.dirname(__FILE__), "lattice.tgz"))
     lattice_url = defined?(LATTICE_URL) && LATTICE_URL
 
-    if lattice_url
-      begin
-        lattice_version = File.read(File.join(File.dirname(__FILE__), 'Version')).chomp
-        lattice_url = "https://s3-us-west-2.amazonaws.com/lattice-concourse/releases/lattice-#{lattice_version}.tgz"
-      rescue
-  	puts 'Could not determine lattice version, and no local lattice.tgz present.'
-        exit(1)
-      end
+    if !lattice_url
+  	  puts 'Could not determine lattice version, and no local lattice.tgz present.'
+      exit(1)
     end
 
     system('curl', '-o', 'lattice.tgz', lattice_url)
@@ -88,11 +83,11 @@ Vagrant.configure("2") do |config|
 
   config.vm.provision "shell" do |s|
     s.inline = <<-SCRIPT
-	tar xzf /vagrant/lattice.tgz lattice-build/scripts/install-from-tar --strip-components=2 -C /tmp
-	/tmp/install-from-tar collocated /vagrant/lattice.tgz 
-	. /var/lattice/setup/lattice-environment
-	echo "Lattice is now installed and running."
-	echo "You may target it using: ltc target ${SYSTEM_DOMAIN}\n"
+      tar xzf /vagrant/lattice.tgz --strip-components=2 -C /tmp lattice-build/scripts/install-from-tar
+      /tmp/install-from-tar collocated /vagrant/lattice.tgz
+      . /var/lattice/setup/lattice-environment
+      echo "Lattice is now installed and running."
+      echo "You may target it using: ltc target ${SYSTEM_DOMAIN}\n"
     SCRIPT
   end
 end
