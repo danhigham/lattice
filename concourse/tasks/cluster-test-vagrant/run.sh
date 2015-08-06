@@ -3,3 +3,4 @@
 set -x -e
 
 export LATTICE_DIR=$PWD/lattice
+sleep 10000
