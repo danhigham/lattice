@@ -11,6 +11,7 @@ cd vagrant-up-tmp
 curl -LO https://dl.bintray.com/mitchellh/vagrant/vagrant_1.7.4_x86_64.deb && dpkg -i vagrant_1.7.4_x86_64.deb
 
 vagrant plugin install vagrant-aws
+vagrant box add lattice/ubuntu-trusty-64 --provider=aws
 
 (cp ../lattice-tar-experimental/lattice-*.tgz lattice.tgz && cp ../lattice/Vagrantfile ./ && vagrant up --provider=aws)
 
