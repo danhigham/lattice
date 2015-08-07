@@ -3,7 +3,7 @@
 set -x -e
 
 export LATTICE_DIR=$PWD/lattice
-export AWS_SSH_PRIVATE_KEY_PATH=$PWD/concourse-key/concourse-test.pem
+export AWS_SSH_PRIVATE_KEY_PATH=$PWD/concourse-key/concourse-test-v0.pem
 
 mkdir vagrant-up-tmp
 cd vagrant-up-tmp
