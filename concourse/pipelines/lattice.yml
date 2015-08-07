@@ -34,7 +34,7 @@ resources:
     type: s3
     source:
       bucket: lattice-concourse
-      regexp: private/concourse-test.pem
+      regexp: private/concourse-test-v(.*).pem
       private: true
       access_key_id: {{s3-access-key-id}}
       secret_access_key: {{s3-secret-access-key}}
@@ -82,22 +82,22 @@ jobs:
     plan:
       - get: lattice
         trigger: true
-      - task: unit-test-ltc
-        file: lattice/concourse/tasks/unit-test-ltc/task.yml
+#     - task: unit-test-ltc
+#       file: lattice/concourse/tasks/unit-test-ltc/task.yml
 
   - name: unit-test-s3tool
     plan:
       - get: lattice
         trigger: true
-      - task: unit-test-s3tool
-        file: lattice/concourse/tasks/unit-test-s3tool/task.yml
+#     - task: unit-test-s3tool
+#       file: lattice/concourse/tasks/unit-test-s3tool/task.yml
 
   - name: unit-test-tee2metron
     plan:
       - get: lattice
         trigger: true
-      - task: unit-test-tee2metron
-        file: lattice/concourse/tasks/unit-test-tee2metron/task.yml
+#     - task: unit-test-tee2metron
+#       file: lattice/concourse/tasks/unit-test-tee2metron/task.yml
 
   - name: compile
     plan:
@@ -141,6 +141,10 @@ jobs:
           file: lattice/concourse/tasks/cluster-test-terraform/task.yml
         - task: cluster-test-vagrant
           file: lattice/concourse/tasks/cluster-test-vagrant/task.yml
+          config:
+            params:
+              AWS_ACCESS_KEY_ID: {{s3-access-key-id}}
+              AWS_SECRET_ACCESS_KEY: {{s3-access-key-id}}
 
   - name: publish-nightly
     plan:
