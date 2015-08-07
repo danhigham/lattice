@@ -18,6 +18,8 @@ export $(vagrant ssh -c "grep SYSTEM_DOMAIN /var/lattice/setup/lattice-environme
 
 cd ..
 
+sleep 120
+
 tar zxf ltc-tar-experimental/ltc-*.tgz
 ./ltc-linux-amd64 target $SYSTEM_DOMAIN
 $PWD/ltc-linux-amd64 test -v -t 10m
