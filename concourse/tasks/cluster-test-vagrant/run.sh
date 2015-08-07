@@ -14,10 +14,9 @@ vagrant plugin install vagrant-aws
 vagrant box add lattice/ubuntu-trusty-64 --provider=aws
 
 (cp ../lattice-tar-experimental/lattice-*.tgz lattice.tgz && cp ../lattice/Vagrantfile ./ && vagrant up --provider=aws)
+export $(vagrant ssh -c 'grep SYSTEM_DOMAIN /var/lattice/setup/lattice-environment')
 
 cd ..
-
-export $(vagrant ssh -c 'grep SYSTEM_DOMAIN /var/lattice/setup/lattice-environment')
 
 tar zxf ltc-tar-experimental/ltc-*.tgz
 ./ltc-linux-amd64 target $SYSTEM_DOMAIN
