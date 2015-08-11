@@ -89,9 +89,6 @@ Vagrant.configure("2") do |config|
 
   config.vm.provision "shell" do |s|
     s.inline = <<-SCRIPT
-      apt-get install incron -y
-      echo "vagrant\nroot" >> /etc/incron.allow
-      
       tar xzf /vagrant/lattice.tgz --strip-components=2 -C /tmp lattice-build/scripts/install-from-tar
       /tmp/install-from-tar collocated /vagrant/lattice.tgz
       . /var/lattice/setup/lattice-environment
